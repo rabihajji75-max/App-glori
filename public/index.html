@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <!-- PWA Meta -->
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Free Fire Glory">
+    
+    <!-- SEO -->
+    <title>Free Fire Glory Pro - تطبيق ويب متكامل</title>
+    <meta name="description" content="تطبيق ويب متكامل لإدارة وجمع القلوري في لعبة Free Fire. نظام متكامل 100%">
+    <meta name="keywords" content="free fire, glory, clan, bot, farming, glory panel">
+    <meta name="author" content="DENJITX">
+    
+    <!-- Manifest & Icons -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/assets/icons/icon-72x72.png" sizes="72x72">
+    <link rel="icon" href="/assets/icons/icon-96x96.png" sizes="96x96">
+    <link rel="icon" href="/assets/icons/icon-128x128.png" sizes="128x128">
+    <link rel="icon" href="/assets/icons/icon-144x144.png" sizes="144x144">
+    <link rel="icon" href="/assets/icons/icon-152x152.png" sizes="152x152">
+    <link rel="icon" href="/assets/icons/icon-192x192.png" sizes="192x192">
+    <link rel="icon" href="/assets/icons/icon-384x384.png" sizes="384x384">
+    <link rel="icon" href="/assets/icons/icon-512x512.png" sizes="512x512">
+    <link rel="apple-touch-icon" href="/assets/icons/apple-icon-180x180.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="/src/styles/main.css">
+    <link rel="stylesheet" href="/src/styles/components.css">
+    
+    <!-- Preload -->
+    <link rel="preload" href="/src/app/core/app.js" as="script">
+    <link rel="preload" href="/src/app/core/store.js" as="script">
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(error) {
+                        console.log('SW registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+    
+    <!-- App Loader -->
+    <style>
+        #app-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loader-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .loader-spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loader-logo {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Loader -->
+    <div id="app-loader">
+        <div class="loader-content">
+            <div class="loader-logo">
+                <i class="fas fa-crown"></i> Glory Pro
+            </div>
+            <div class="loader-spinner"></div>
+            <p>جاري تحميل التطبيق...</p>
+            <small class="text-muted">الإصدار 1.0.0</small>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <nav class="navbar navbar-dark bg-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#/">
+                        <i class="fas fa-crown"></i>
+                        <span>Free Fire Glory Pro</span>
+                    </a>
+                    
+                    <div class="d-flex align-items-center">
+                        <!-- Online Status -->
+                        <div class="connection-status me-3">
+                            <span class="status-indicator online"></span>
+                            <small>متصل</small>
+                        </div>
+                        
+                        <!-- User Menu -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" 
+                                    id="userMenu" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i>
+                                <span id="username">ضيف</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#/profile"><i class="fas fa-user-cog"></i> الملف الشخصي</a></li>
+                                <li><a class="dropdown-item" href="#/settings"><i class="fas fa-cog"></i> الإعدادات</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- Sidebar -->
+                    <aside class="sidebar col-md-3 col-lg-2 d-md-block">
+                        <div class="sidebar-sticky">
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="#/dashboard">
+                                        <i class="fas fa-home"></i> لوحة التحكم
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#/accounts">
+                                        <i class="fas fa-users"></i> الحسابات
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#/clans">
+                                        <i class="fas fa-shield-alt"></i> الكلانات
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#/farming">
+                                        <i class="fas fa-robot"></i> الجمع التلقائي
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#/tasks">
+                                        <i class="fas fa-tasks"></i> المهام المجدولة
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#/analytics">
+                                        <i class="fas fa-chart-bar"></i> الإحصائيات
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#/logs">
+                                        <i class="fas fa-history"></i> السجلات
+                                    </a>
+                                </li>
+                            </ul>
+                            
+                            <!-- Quick Stats -->
+                            <div class="sidebar-stats">
+                                <div class="stat-item">
+                                    <small>الحسابات النشطة</small>
+                                    <span id="activeAccounts">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <small>القلوري اليوم</small>
+                                    <span id="todayGlory">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Content Area -->
+                    <div class="content-area col-md-9 col-lg-10">
+                        <div class="content-header">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb" id="breadcrumb"></ol>
+                            </nav>
+                        </div>
+                        
+                        <!-- Dynamic Content -->
+                        <div class="content-body" id="content">
+                            <!-- Content will be loaded here -->
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div class="content-footer">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        &copy; 2024 Free Fire Glory Pro - Developed by DENJITX
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <small class="text-muted" id="serverStatus">
+                                        <i class="fas fa-server"></i> الخادم: جاهز
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Floating Action Button -->
+        <button class="fab btn btn-primary" id="quickActionBtn" title="إجراء سريع">
+            <i class="fas fa-bolt"></i>
+        </button>
+
+        <!-- Quick Actions Menu -->
+        <div class="quick-actions-menu" id="quickActionsMenu">
+            <button class="action-btn" data-action="addAccount">
+                <i class="fas fa-user-plus"></i>
+                <span>إضافة حساب</span>
+            </button>
+            <button class="action-btn" data-action="startAll">
+                <i class="fas fa-play-circle"></i>
+                <span>تشغيل الكل</span>
+            </button>
+            <button class="action-btn" data-action="sendInvites">
+                <i class="fas fa-paper-plane"></i>
+                <span>إرسال دعوات</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Install Prompt -->
+    <div class="install-prompt" id="installPrompt">
+        <div class="prompt-content">
+            <i class="fas fa-download prompt-icon"></i>
+            <div class="prompt-text">
+                <h6>تثبيت التطبيق</h6>
+                <p>ثبّت Glory Pro على جهازك لتجربة أفضل</p>
+            </div>
+            <button class="btn btn-sm btn-primary" id="installBtn">تثبيت</button>
+            <button class="btn btn-sm btn-outline-secondary" id="dismissBtn">لاحقاً</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="/src/app/core/store.js"></script>
+    <script src="/src/app/core/router.js"></script>
+    <script src="/src/app/core/events.js"></script>
+    <script src="/src/app/core/app.js"></script>
+    
+    <!-- Modules -->
+    <script src="/src/app/modules/auth/auth.js"></script>
+    <script src="/src/app/modules/accounts/accounts.js"></script>
+    <script src="/src/app/modules/clans/clans.js"></script>
+    <script src="/src/app/modules/glory/glory.js"></script>
+    
+    <!-- Services -->
+    <script src="/src/services/api/api.js"></script>
+    <script src="/src/services/database/db.js"></script>
+    <script src="/src/services/notifications/notify.js"></script>
+    
+    <!-- Utils -->
+    <script src="/src/utils/helpers.js"></script>
+    <script src="/src/utils/validators.js"></script>
+
+    <!-- Initialize App -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize app
+            window.App = new GloryApp();
+            window.App.init();
+            
+            // Hide loader after 2 seconds
+            setTimeout(() => {
+                document.getElementById('app-loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('app-loader').style.display = 'none';
+                    document.getElementById('app').style.display = 'block';
+                }, 500);
+            }, 2000);
+            
+            // Handle install prompt
+            let deferredPrompt;
+            const installPrompt = document.getElementById('installPrompt');
+            const installBtn = document.getElementById('installBtn');
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installPrompt.style.display = 'block';
+                
+                installBtn.addEventListener('click', () => {
+                    installPrompt.style.display = 'none';
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        deferredPrompt = null;
+                    });
+                });
+            });
+            
+            document.getElementById('dismissBtn').addEventListener('click', () => {
+                installPrompt.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+  </html>
